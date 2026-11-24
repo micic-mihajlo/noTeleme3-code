@@ -1,12 +1,10 @@
 import { describe, expect, it } from "@effect/vitest";
-import * as Cause from "effect/Cause";
 import * as Effect from "effect/Effect";
-import * as Exit from "effect/Exit";
 import * as Option from "effect/Option";
 import * as Tracer from "effect/Tracer";
 
 import {
-  nonInterferingTracer,
+  layer,
   RelayClientTracer,
   withLocalTracing,
   withRelayClientTracing,
@@ -48,41 +46,22 @@ describe("withRelayClientTracing", () => {
   );
 });
 
-describe("nonInterferingTracer", () => {
-  it.effect("exports failures without their messages", () =>
+describe("layer", () => {
+  it.effect("never installs a relay exporter, even when a caller passes config", () =>
     Effect.gen(function* () {
-      const exits: Array<Exit.Exit<unknown, unknown>> = [];
-      const delegate = Tracer.make({
-        span: (options) => {
-          const span = new Tracer.NativeSpan(options);
-          const end = span.end.bind(span);
-          span.end = (endTime, exit) => {
-            end(endTime, exit);
-            exits.push(exit);
-          };
-          return span;
-        },
-      });
-      const failure = Object.assign(
-        new Error("studio-mac could not establish a WebSocket connection.", {
-          cause: new Error("connect ECONNREFUSED studio-mac.local"),
-        }),
-        { name: "ConnectionTransientError" },
+      const tracer = yield* RelayClientTracer.pipe(
+        Effect.provide(
+          layer(
+            {
+              tracesUrl: "https://example.invalid/v1/traces",
+              tracesDataset: "d",
+              tracesToken: "t",
+            },
+            { serviceName: "test", runtime: "node", serviceInstanceId: "i", client: "test" },
+          ),
+        ),
       );
-
-      yield* Effect.fail(failure).pipe(
-        Effect.withSpan("relay.connection.attempt"),
-        Effect.withTracer(nonInterferingTracer(delegate)),
-        Effect.ignore,
-      );
-
-      const exit = exits[0];
-      if (exit === undefined || !Exit.isFailure(exit)) throw new Error("expected a failed span");
-      const exported = Cause.prettyErrors(exit.cause);
-      expect(exported.map((error) => error.name)).toEqual(["ConnectionTransientError"]);
-      const text = exported.map((error) => `${error.message}\n${error.stack}`).join("\n");
-      expect(text).toContain("Caused by: Error");
-      expect(text).not.toContain("studio-mac");
+      expect(Option.isNone(tracer)).toBe(true);
     }),
   );
 });
