@@ -275,7 +275,7 @@ it.layer(NodeServices.layer)("server self update", (it) => {
       for (const harness of [service, desktop]) {
         expect(
           (yield* harness.selfUpdate.update({ targetVersion: "1.1.0" }).pipe(Effect.flip)).reason,
-        ).toBe("Example Corp manages T3 Code updates.");
+        ).toBe("Example Corp manages noTeleme3-code updates.");
       }
       expect([...service.order, ...desktop.order]).toEqual([]);
     }),
@@ -299,7 +299,7 @@ it.layer(NodeServices.layer)("server self update", (it) => {
       expect(
         (yield* selfUpdate.update({ targetVersion: "1.2.0-nightly.20261028.1" }).pipe(Effect.flip))
           .reason,
-      ).toBe("Example Corp manages T3 Code updates. Only stable releases can be installed.");
+      ).toBe("Example Corp manages noTeleme3-code updates. Only stable releases can be installed.");
       expect(order).toEqual([]);
       // The mirror lists only 1.1.0's archive.
       expect((yield* selfUpdate.update({ targetVersion: "1.2.0" }).pipe(Effect.flip)).reason).toBe(
@@ -512,7 +512,7 @@ it.layer(NodeServices.layer)("pruning runtimes on start", (it) => {
     }),
   );
 
-  it.effect("recognizes its runtime through a symlinked T3 home", () =>
+  it.effect("recognizes its runtime through a symlinked noTeleme3-code home", () =>
     Effect.gen(function* () {
       const { removed } = yield* pruneOnStart({ executable: "own runtime", symlinkedHome: true });
       expect(removed).toEqual([staleVersion]);
@@ -529,7 +529,7 @@ it.layer(NodeServices.layer)("pruning runtimes on start", (it) => {
   // In-place updates move the active version but leave the launch agent on the launcher's runtime.
   it.effect.each([
     { name: "", throughLink: false },
-    { name: " through a symlinked T3 home", throughLink: true },
+    { name: " through a symlinked noTeleme3-code home", throughLink: true },
   ])("keeps the runtime a stopped service's launch agent starts$name", ({ throughLink }) =>
     Effect.gen(function* () {
       const { removed, remaining } = yield* pruneOnStart({

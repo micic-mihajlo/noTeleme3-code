@@ -117,7 +117,7 @@ export const make = Effect.gen(function* () {
 
   // PATH can reach the regular launcher directly; removal still requires isOurLink.
   const runsOurLauncher = Effect.fn("DesktopCliCommand.runsOurLauncher")(
-    // Another T3 home's link is marked too, so compare where it leads, not the marker alone.
+    // Another noTeleme3-code home's link is marked too, so compare where it leads, not the marker alone.
     function* (candidate: string) {
       const [resolved, ours] = yield* Effect.all([fs.realPath(candidate), fs.realPath(launcher)]);
       if (resolved !== ours) return false;
@@ -240,7 +240,7 @@ export const make = Effect.gen(function* () {
     }
     const launcherPath = (yield* exists(launcher)) ? launcher : null;
     const found = yield* installedAt;
-    // Our link into another T3 home is not this app's command; Install updates it in place.
+    // Our link into another noTeleme3-code home is not this app's command; Install updates it in place.
     const installed =
       windows || (Option.isSome(found) && (yield* leadsHere(found.value)))
         ? found
@@ -299,7 +299,7 @@ export const make = Effect.gen(function* () {
       // PATH would split the folder at the `;`, leaving two wrong entries behind.
       if (binDirectory.includes(";")) {
         return yield* fail(
-          `T3 Code cannot put ${binDirectory} on PATH because it has a ";". Run ${launcher} directly.`,
+          `noTeleme3-code cannot put ${binDirectory} on PATH because it has a ";". Run ${launcher} directly.`,
         );
       }
       const entries = pathEntries(yield* readUserPath, ";");
@@ -318,7 +318,7 @@ export const make = Effect.gen(function* () {
       if (Option.getOrUndefined(target) === launcher) return yield* state;
     }
     const shadowedBy = yield* foreignFirstOnPath;
-    // Our own link into another T3 home runs first too; it is the one this install updates.
+    // Our own link into another noTeleme3-code home runs first too; it is the one this install updates.
     if (Option.isSome(shadowedBy) && shadowedBy.value !== replaced) {
       return yield* fail(
         `Another t3 at ${shadowedBy.value} runs first in a new terminal. Remove it, or run the launcher directly at ${launcher}.`,
@@ -398,17 +398,20 @@ export const make = Effect.gen(function* () {
       return yield* fail("Install the t3 command first.");
     }
     const setup = startupLine(installed.value);
-    if (setup === undefined) return yield* fail("T3 Code cannot add t3 to this shell's PATH.");
+    if (setup === undefined)
+      return yield* fail("noTeleme3-code cannot add t3 to this shell's PATH.");
     const shadowedBy = yield* foreignFirstOnPath;
     if (Option.isSome(shadowedBy)) {
       return yield* fail(
-        `Another t3 at ${shadowedBy.value} runs first; T3 Code leaves it in place.`,
+        `Another t3 at ${shadowedBy.value} runs first; noTeleme3-code leaves it in place.`,
       );
     }
     if (!(yield* folderOnPath(installed.value)) && !(yield* hasLine(setup))) {
       yield* fs.makeDirectory(path.dirname(setup.path), { recursive: true }).pipe(
         Effect.andThen(
-          fs.writeFileString(setup.path, `\n# Added by T3 Code\n${setup.line}\n`, { flag: "a" }),
+          fs.writeFileString(setup.path, `\n# Added by noTeleme3-code\n${setup.line}\n`, {
+            flag: "a",
+          }),
         ),
         Effect.mapError(() => fail(`Could not add t3 to ${setup.file}.`)),
       );
@@ -424,12 +427,12 @@ export const make = Effect.gen(function* () {
       if (!freshInstall) {
         return yield* logInfo("left the t3 command to Settings on an existing install");
       }
-      // Another T3 home's app owns the existing link; only Install in Settings may take it over.
+      // Another noTeleme3-code home's app owns the existing link; only Install in Settings may take it over.
       const existing = Option.getOrUndefined(yield* installedAt);
       if (existing !== undefined) {
         const target = yield* fs.readLink(existing).pipe(Effect.option);
         if (Option.getOrUndefined(target) !== launcher) {
-          return yield* logInfo("left another T3 Code app's t3 command in place", {
+          return yield* logInfo("left another noTeleme3-code app's t3 command in place", {
             existing,
           });
         }

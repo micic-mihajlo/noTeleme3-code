@@ -41,7 +41,7 @@ export interface McpClientCaller {
   readonly label: string;
   readonly access: AuthMcpClientAccess;
   /**
-   * Another T3 Code environment's peer link. What it starts here carries its
+   * Another noTeleme3-code environment's peer link. What it starts here carries its
    * session as `linkOrigin`, and it changes only that work (`linkOrigin.ts`).
    */
   readonly linked?: boolean | undefined;
@@ -166,12 +166,12 @@ export interface McpInvocationScope {
    * see the URL they were configured with, so links they must fetch carry it. Unset in-process.
    */
   readonly origin?: string | undefined;
-  /** False when the calling thread's project is on no forge T3 reads; `/mcp` reads it per request. */
+  /** False when the calling thread's project is on no forge noTeleme3-code reads; `/mcp` reads it per request. */
   readonly forge?: boolean;
 }
 
 /**
- * T3 Code renders `t3-thread://` links as thread chips. Other MCP clients cannot open them, so
+ * noTeleme3-code renders `t3-thread://` links as thread chips. Other MCP clients cannot open them, so
  * they get the hosted link Copy thread copies, which opens the thread in either app or a browser.
  * A known `title` labels the chip for clients that cannot load this environment's threads.
  */
@@ -194,7 +194,7 @@ export class McpInvocationContext extends Context.Service<
 
 /**
  * `McpSchema.EnabledWhen` for tools a delegated child must not see or call.
- * EnabledWhen only receives the MCP client profile, so read the T3 caller from the request fiber.
+ * EnabledWhen only receives the MCP client profile, so read the noTeleme3-code caller from the request fiber.
  */
 export const hiddenFromSubagents = (): boolean => {
   const fiber = Fiber.getCurrent();
@@ -306,7 +306,7 @@ export const requireThreadMcpCapability = <const C extends "preview" | "device">
 const threadCallerRequired = (operation: string) =>
   new OrchestratorMcpFailure({
     code: "thread_credential_required",
-    message: `${operation} acts as the calling T3 thread, so it needs an agent running inside T3 Code. This MCP client signed in from outside a thread.`,
+    message: `${operation} acts as the calling noTeleme3-code thread, so it needs an agent running inside noTeleme3-code. This MCP client signed in from outside a thread.`,
   });
 
 export type McpThreadInvocationScope = McpInvocationScope & { readonly thread: McpThreadCaller };

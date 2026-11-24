@@ -102,54 +102,58 @@ function layerMockSpawner(
 }
 
 describe("tailscale", () => {
-  it.effect("does not treat a non-T3 response on the HTTPS probe path as reachable", () =>
-    Effect.gen(function* () {
-      for (const [body, status] of [
-        ["<!doctype html><title>Other application</title>", 200],
-        [null, 204],
-      ] as const) {
-        const reachable = yield* probeTailscaleHttpsEndpoint({
-          baseUrl: "https://desktop.example.ts.net",
-          environmentId: "this-environment",
-        }).pipe(
-          Effect.provideService(
-            HttpClient.HttpClient,
-            HttpClient.make((request) =>
-              Effect.succeed(HttpClientResponse.fromWeb(request, new Response(body, { status }))),
+  it.effect(
+    "does not treat a non-noTeleme3-code response on the HTTPS probe path as reachable",
+    () =>
+      Effect.gen(function* () {
+        for (const [body, status] of [
+          ["<!doctype html><title>Other application</title>", 200],
+          [null, 204],
+        ] as const) {
+          const reachable = yield* probeTailscaleHttpsEndpoint({
+            baseUrl: "https://desktop.example.ts.net",
+            environmentId: "this-environment",
+          }).pipe(
+            Effect.provideService(
+              HttpClient.HttpClient,
+              HttpClient.make((request) =>
+                Effect.succeed(HttpClientResponse.fromWeb(request, new Response(body, { status }))),
+              ),
             ),
-          ),
-        );
-        assert.isFalse(reachable, `HTTP ${status} without a T3 descriptor`);
-      }
-    }),
+          );
+          assert.isFalse(reachable, `HTTP ${status} without a noTeleme3-code descriptor`);
+        }
+      }),
   );
 
-  it.effect("does not treat another T3 server behind the Serve URL as this server", () =>
-    Effect.gen(function* () {
-      const answer = (environmentId: string) =>
-        HttpClient.make((request) =>
-          Effect.succeed(
-            HttpClientResponse.fromWeb(
-              request,
-              Response.json({
-                environmentId,
-                label: "T3 server",
-                platform: { os: "linux", arch: "x64" },
-                serverVersion: "0.1.9",
-                capabilities: { repositoryIdentity: true },
-              }),
+  it.effect(
+    "does not treat another noTeleme3-code server behind the Serve URL as this server",
+    () =>
+      Effect.gen(function* () {
+        const answer = (environmentId: string) =>
+          HttpClient.make((request) =>
+            Effect.succeed(
+              HttpClientResponse.fromWeb(
+                request,
+                Response.json({
+                  environmentId,
+                  label: "noTeleme3-code server",
+                  platform: { os: "linux", arch: "x64" },
+                  serverVersion: "0.1.9",
+                  capabilities: { repositoryIdentity: true },
+                }),
+              ),
             ),
-          ),
-        );
-      const probe = (served: string) =>
-        probeTailscaleHttpsEndpoint({
-          baseUrl: "https://desktop.example.ts.net",
-          environmentId: "this-environment",
-        }).pipe(Effect.provideService(HttpClient.HttpClient, answer(served)));
+          );
+        const probe = (served: string) =>
+          probeTailscaleHttpsEndpoint({
+            baseUrl: "https://desktop.example.ts.net",
+            environmentId: "this-environment",
+          }).pipe(Effect.provideService(HttpClient.HttpClient, answer(served)));
 
-      assert.isTrue(yield* probe("this-environment"));
-      assert.isFalse(yield* probe("another-environment"));
-    }),
+        assert.isTrue(yield* probe("this-environment"));
+        assert.isFalse(yield* probe("another-environment"));
+      }),
   );
 
   it("finds the Serve routes that forward to the bound address, and only those", () => {

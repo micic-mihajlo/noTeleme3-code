@@ -6,7 +6,7 @@ For one prompt on a timer or webhook, use a scheduled task. Use a workflow when 
 
 ## Turn on workflows
 
-Workflows are a Labs feature, off by default. Turn on **Settings → Labs → Workflows** for the server that runs them. On a server without a desktop, set `"workflowsEnabled": true` in `userdata/settings.json` in its T3 home (`~/.t3` by default). While off, nothing in the workflows folder runs and `t3 workflow` says how to turn it on; runs are kept and continue once it is on again.
+Workflows are a Labs feature, off by default. Turn on **Settings → Labs → Workflows** for the server that runs them. On a server without a desktop, set `"workflowsEnabled": true` in `userdata/settings.json` in its noTeleme3-code home (`~/.t3` by default). While off, nothing in the workflows folder runs and `t3 workflow` says how to turn it on; runs are kept and continue once it is on again.
 
 ## Create a workflow
 
@@ -36,7 +36,7 @@ export default workflow(
 );
 ```
 
-Start it with `t3 workflow start release --input '{"name":"v1.4"}' --key v1.4`, then answer its question in the app. `T3`, `Effect`, `Schema` and `Option` are provided; a workflow file imports nothing from T3 or Effect. Name files with letters, digits, `-`, `_` and `.`; other names are skipped with a warning.
+Start it with `t3 workflow start release --input '{"name":"v1.4"}' --key v1.4`, then answer its question in the app. `T3`, `Effect`, `Schema` and `Option` are provided; a workflow file imports nothing from noTeleme3-code or Effect. Name files with letters, digits, `-`, `_` and `.`; other names are skipped with a warning.
 
 Saving checks that the file loads, does not duplicate a workflow name and version, and does not remove a version with unfinished runs. A file that fails these checks keeps its last working version while the Workflows page (and the server log) shows why; other files are not affected. A change held back by unfinished runs goes in by itself once those runs end or are cancelled. Mistakes inside a workflow body surface when a run hits them and pauses. To change steps while runs are unfinished, add the new body under a higher `version` and keep the old one until those runs end.
 
@@ -64,7 +64,7 @@ Every start needs a `--key`: starting twice with the same key returns the same r
 
 - **Schedules:** `every` runs on an interval, starting one interval after the workflow loads; `daily` runs at a local time of day (a time missed by more than 10 minutes while the server is down is skipped).
 - **Webhooks:** `t3 workflow hooks` prints each hook's path; prepend your server's address. The path contains the hook's secret, so share it only with the sender. A sender's retry that repeats its delivery header (such as GitHub's `X-GitHub-Delivery`) starts no second run, and bodies over 1 MiB are refused. A hook starts at most 60 runs a minute; requests past that get `429` and can be sent again a minute later. Organization policies blocking webhook tasks block workflow webhooks too.
-- **Issues and pull requests:** workflows can start on new issues or pull requests and read, comment on, or update them via **Settings → Source control & issues** — no webhook needed. T3 Code checks roughly once a minute, and only items opened after the workflow was first loaded start runs.
+- **Issues and pull requests:** workflows can start on new issues or pull requests and read, comment on, or update them via **Settings → Source control & issues** — no webhook needed. noTeleme3-code checks roughly once a minute, and only items opened after the workflow was first loaded start runs.
 
 ## Follow runs in the app
 

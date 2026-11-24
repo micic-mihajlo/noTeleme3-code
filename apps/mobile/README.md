@@ -1,7 +1,7 @@
-# T3 Code Mobile
+# noTeleme3-code Mobile
 
 > [!NOTE]
-> To install the released app from the App Store or Google Play, see [Mobile app](../../docs/user/install.md#mobile-app). This guide covers building it from source.
+> noTeleme3-code does not publish a mobile app; see [Mobile app](../../docs/user/install.md#mobile-app). This guide covers building it from source.
 
 ## Quickstart
 
@@ -10,9 +10,9 @@
 
 This app has three variants:
 
-- `development`: Expo dev client, installable side-by-side as `T3 Code Dev`
-- `preview`: persistent internal preview build, installable side-by-side as `T3 Code Preview`
-- `production`: store/release build as `T3 Code`
+- `development`: Expo dev client, installable side-by-side as `noTeleme3-code Dev`
+- `preview`: persistent internal preview build, installable side-by-side as `noTeleme3-code Preview`
+- `production`: store/release build as `noTeleme3-code`
 
 Run commands from `apps/mobile`.
 

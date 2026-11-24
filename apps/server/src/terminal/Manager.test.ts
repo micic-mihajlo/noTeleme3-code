@@ -2760,7 +2760,7 @@ it.layer(
       runtimeEnv: { Term_Program: "", term_program_version: "custom-version" },
     },
   ] as const)(
-    "identifies as T3 Code unless the terminal env overrides it on $platform",
+    "identifies as noTeleme3-code unless the terminal env overrides it on $platform",
     ({ platform, parentEnv, runtimeEnv }) =>
       Effect.gen(function* () {
         const originalEnv = { ...parentEnv };
@@ -2838,9 +2838,9 @@ it.layer(
       const appDir = "/tmp/.mount_T3Codeabc123";
       const { manager, ptyAdapter } = yield* createManager(5, {
         env: {
-          APPIMAGE: "/home/user/T3-Code.AppImage",
+          APPIMAGE: "/home/user/noTeleme3-code.AppImage",
           APPDIR: appDir,
-          ARGV0: "/home/user/T3-Code.AppImage",
+          ARGV0: "/home/user/noTeleme3-code.AppImage",
           OWD: "/home/user/project",
           PATH: `${appDir}/usr/bin:${appDir}:/usr/local/bin:/usr/bin:/bin`,
           LD_LIBRARY_PATH: `${appDir}/usr/lib:/home/user/.local/lib`,

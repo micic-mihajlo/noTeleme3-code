@@ -36,7 +36,7 @@ const MAX_WAIT_TIMEOUT_MS = 45_000;
 type Scope = McpInvocationContext.McpInvocationScope;
 
 /**
- * Runs T3 MCP tools in a linked environment for an agent here. The tool's own
+ * Runs noTeleme3-code MCP tools in a linked environment for an agent here. The tool's own
  * declaration checks the agent here first; the linked environment then holds
  * the call to the link's access, narrowed to the agent's modes, which every
  * forwarded call carries.

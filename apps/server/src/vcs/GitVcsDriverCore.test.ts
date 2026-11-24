@@ -2112,7 +2112,7 @@ describe("pullCurrentBranch", () => {
   );
 });
 
-it.effect.each(["a T3 branch creation", "an external worktree addition"] as const)(
+it.effect.each(["a noTeleme3-code branch creation", "an external worktree addition"] as const)(
   "refreshes an in-flight ref snapshot after %s",
   (mutation) =>
     Effect.scoped(
@@ -2132,7 +2132,10 @@ it.effect.each(["a T3 branch creation", "an external worktree addition"] as cons
               command.args.includes("for-each-ref") &&
               command.args.includes("refs/heads") &&
               command.args.includes("refs/remotes");
-            if (!isRefScan && (!isWorktreeScan || mutation === "a T3 branch creation")) {
+            if (
+              !isRefScan &&
+              (!isWorktreeScan || mutation === "a noTeleme3-code branch creation")
+            ) {
               return yield* delegate.spawn(command);
             }
             if (!(yield* Ref.getAndSet(firstScan, false))) {
@@ -2165,7 +2168,7 @@ it.effect.each(["a T3 branch creation", "an external worktree addition"] as cons
         const inFlight = yield* list.pipe(Effect.forkChild({ startImmediately: true }));
         yield* Deferred.await(firstScanCompleted);
 
-        if (mutation === "a T3 branch creation") {
+        if (mutation === "a noTeleme3-code branch creation") {
           yield* driver.createRef({ cwd, refName });
           yield* Deferred.succeed(releaseOtherScans, undefined);
           assert.equal((yield* Fiber.join(inFlight)).refs[0]?.name, refName);
@@ -10665,7 +10668,7 @@ it.layer(layerTest)("GitVcsDriver core integration", (it) => {
           yield* git(origin, ["init", "--bare"]);
           yield* git(fork, ["init", "--bare"]);
           yield* git(cwd, ["remote", "add", "origin", origin]);
-          // e.g. the remote T3 adds when checking out a pull request from alice's fork.
+          // e.g. the remote noTeleme3-code adds when checking out a pull request from alice's fork.
           yield* git(cwd, ["remote", "add", "alice", fork]);
           yield* git(cwd, ["checkout", "-b", "alice/fix"]);
           yield* writeTextFile(cwd, "fix.txt", "fix\n");

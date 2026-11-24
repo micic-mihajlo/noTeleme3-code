@@ -41,7 +41,7 @@ const TokenFile = Schema.Struct({
   project_id: Schema.optional(Schema.String),
 });
 // The 1.5.x CLI never writes acp_token.json: it keeps its sign-in in the OS keyring, or in
-// antigravity-oauth-token without one or when T3 bypasses the keyring. It stores no OAuth client, so T3 cannot refresh it.
+// antigravity-oauth-token without one or when noTeleme3-code bypasses the keyring. It stores no OAuth client, so noTeleme3-code cannot refresh it.
 const CliToken = Schema.Struct({
   token: Schema.Struct({
     access_token: Schema.NonEmptyString,

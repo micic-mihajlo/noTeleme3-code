@@ -67,7 +67,7 @@ export function acpProviderOptionDescriptors(input: {
   let hasModeCategory = false;
 
   for (const option of input.configOptions ?? []) {
-    // Model and collaboration_mode choices use T3 model and interaction controls.
+    // Model and collaboration_mode choices use noTeleme3-code model and interaction controls.
     if (option.category === "model" || option.category === "collaboration_mode") {
       continue;
     }

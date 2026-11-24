@@ -39,7 +39,7 @@ export function createUpdateProgress(
         const labels = {
           download: "Downloading...",
           verify: "Verifying the download...",
-          extract: "Extracting T3 Code...",
+          extract: "Extracting noTeleme3-code...",
           validate: "Checking the new executable...",
           cached: "Using the downloaded release...",
         };

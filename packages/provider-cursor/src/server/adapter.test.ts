@@ -947,7 +947,7 @@ describe("CursorAdapterV2", () => {
     ),
   );
 
-  it.effect("sends T3 instructions to each Cursor conversation that lacks them", () =>
+  it.effect("sends noTeleme3-code instructions to each Cursor conversation that lacks them", () =>
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
       const workspace = yield* fileSystem.makeTempDirectoryScoped({ prefix: "cursor-v2-device-" });
@@ -1117,8 +1117,8 @@ describe("CursorAdapterV2", () => {
           lastProviderTurn = providerTurn.providerTurn;
         const sent = sentMessages.at(-1)!;
         return {
-          orchestration: sent.includes("## T3 Code orchestration"),
-          devices: sent.includes("## T3 Code devices"),
+          orchestration: sent.includes("## noTeleme3-code orchestration"),
+          devices: sent.includes("## noTeleme3-code devices"),
           runtime: sent.includes("<runtime_info>"),
         };
       });
@@ -3460,7 +3460,7 @@ describe("CursorAdapterV2", () => {
           },
           "cwd-only": { command: "node", args: ["server.mjs"], cwd: projectRoot },
         };
-        // The agent is created with T3's server only; the resolved servers go with each turn.
+        // The agent is created with noTeleme3-code's server only; the resolved servers go with each turn.
         assert.deepEqual(openedWith?.mcpServers, t3Servers);
         yield* sendTurn(1);
         assert.deepEqual(sentWith[0], { ...expectedServers, ...t3Servers });

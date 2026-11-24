@@ -42,8 +42,8 @@ const semver = requireFromUpdater("semver") as { parse: (version: string) => Run
 
 const releaseTitle = (version: string) =>
   version.includes("-nightly.")
-    ? `T3 Code Nightly ${version} (0123456789ab)`
-    : `T3 Code v${version}`;
+    ? `noTeleme3-code Nightly ${version} (0123456789ab)`
+    : `noTeleme3-code v${version}`;
 
 const releaseFeed = (...versions: ReadonlyArray<string>) =>
   parseXml(
@@ -648,7 +648,7 @@ describe("DesktopUpdates", () => {
   });
 
   it.effect("downloads again when the downloaded update file was deleted before install", () => {
-    const downloadedFile = "/cache/pending/T3-Code-1.2.4-arm64.zip";
+    const downloadedFile = "/cache/pending/noTeleme3-code-1.2.4-arm64.zip";
     let installedFileExists: boolean | undefined;
     const harness = makeHarness({
       checkForUpdates: Effect.sync(() => harness.emit("update-available", { version: "1.2.4" })),
@@ -1404,7 +1404,7 @@ describe("describeUpdateErrorCause", () => {
 });
 
 describe("DesktopUpdates under a managed policy", () => {
-  const message = "Example Corp manages T3 Code updates.";
+  const message = "Example Corp manages noTeleme3-code updates.";
   const managed = (
     policy: Partial<DesktopUpdatePolicy.UpdatePolicy>,
   ): DesktopUpdatePolicy.UpdatePolicy => ({

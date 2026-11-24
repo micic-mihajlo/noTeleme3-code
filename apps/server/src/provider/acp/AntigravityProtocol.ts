@@ -318,7 +318,7 @@ function antigravityClientReadPath(update: {
 
 /**
  * The agent never completes a subagent's `client_view_file` call, then fails every open call
- * with the next unrelated step error. Report reads T3 served as completed instead.
+ * with the next unrelated step error. Report reads noTeleme3-code served as completed instead.
  */
 export function makeAntigravityReadRepair() {
   type Outcome = "served" | "refused";
@@ -336,7 +336,7 @@ export function makeAntigravityReadRepair() {
     },
     /**
      * Each `fs/read_text_file` request answers the oldest open read of its path, in order.
-     * Returns the call a served read completes, so T3 can report it without waiting.
+     * Returns the call a served read completes, so noTeleme3-code can report it without waiting.
      */
     attempted: (path: string, served: boolean) => {
       const outcome = served ? "served" : "refused";
@@ -396,9 +396,9 @@ function stripAntigravityToolSummary(value: unknown): unknown {
 }
 
 /**
- * agy adds its own `toolSummary` to MCP call arguments. T3 records its MCP results under the
+ * agy adds its own `toolSummary` to MCP call arguments. noTeleme3-code records its MCP results under the
  * arguments it received, so the summary is dropped before the shared adapter matches them.
- * Untitled updates cannot be identified and are stripped too; titled non-T3 calls keep it.
+ * Untitled updates cannot be identified and are stripped too; titled non-noTeleme3-code calls keep it.
  */
 function withoutT3McpToolSummary(
   update: Extract<

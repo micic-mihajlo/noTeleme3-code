@@ -195,28 +195,30 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
       Effect.result,
     );
 
-  it.effect("refuses a manual web launch while a lock-aware server owns the T3 home", () =>
-    Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const path = yield* Path.Path;
-      const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t3-cli-preflight-live-" });
-      const child = yield* liveProcess;
-      assert(child.pid !== undefined);
-      const owner = yield* acquireOwnership(baseDir);
-      yield* owner.publish({
-        version: 1,
-        pid: child.pid,
-        port: 3773,
-        origin: "http://127.0.0.1:3773",
-        startedAt: "2026-10-01T00:00:00.000Z",
-      });
-      const cwd = path.join(baseDir, "project");
-      const result = yield* resolveManualWebLaunch(baseDir, cwd);
-      assert(Result.isFailure(result));
-      expect(result.failure).toContain("A T3 Code server is already running");
-      expect(result.failure).toContain(`pid ${child.pid}`);
-      expect(yield* fs.exists(cwd)).toBe(false);
-    }),
+  it.effect(
+    "refuses a manual web launch while a lock-aware server owns the noTeleme3-code home",
+    () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const baseDir = yield* fs.makeTempDirectoryScoped({ prefix: "t3-cli-preflight-live-" });
+        const child = yield* liveProcess;
+        assert(child.pid !== undefined);
+        const owner = yield* acquireOwnership(baseDir);
+        yield* owner.publish({
+          version: 1,
+          pid: child.pid,
+          port: 3773,
+          origin: "http://127.0.0.1:3773",
+          startedAt: "2026-10-01T00:00:00.000Z",
+        });
+        const cwd = path.join(baseDir, "project");
+        const result = yield* resolveManualWebLaunch(baseDir, cwd);
+        assert(Result.isFailure(result));
+        expect(result.failure).toContain("A noTeleme3-code server is already running");
+        expect(result.failure).toContain(`pid ${child.pid}`);
+        expect(yield* fs.exists(cwd)).toBe(false);
+      }),
   );
 
   it.effect("refuses a manual web launch when a pre-lock record belongs to a live process", () =>

@@ -5,7 +5,7 @@ A T3 Connect connection goes through four parts, in this order:
 1. **This device** reaches T3 Connect over the internet.
 2. **T3 Connect** checks your sign-in and the host's link.
 3. **The host's tunnel** (cloudflared on the host) carries the request to the host.
-4. **T3 Code on the host** answers.
+4. **noTeleme3-code on the host** answers.
 
 When a connection fails, open **Settings > Environments**, find the environment,
 and select **Details**. The first part marked as failed is the cause. Find its
@@ -22,16 +22,16 @@ problem on one device, use **Details** on that device.
 T3 Connect could not reach the host's tunnel. This means one of these:
 
 - The host is asleep, turned off, or offline.
-- T3 Code is not running on the host.
+- noTeleme3-code is not running on the host.
 - The host's network blocks the tunnel. See
   [Port 7844 is blocked on the host](#port-7844-is-blocked-on-the-host).
 
 Fix:
 
-1. Make sure the host is awake and T3 Code runs on it.
+1. Make sure the host is awake and noTeleme3-code runs on it.
 2. On the host, run `t3 connect status`. It names the problem on the host's side.
 3. If the host was offline for a long time, T3 Connect removes its tunnel. Start
-   T3 Code on the host and update it to the latest version. It gets a new tunnel.
+   noTeleme3-code on the host and update it to the latest version. It gets a new tunnel.
 
 ## Port 7844 is blocked on the host
 
@@ -55,17 +55,17 @@ host and this device are on the same Tailscale network, add the host's
 Tailscale address as a direct route. See
 [Reach one machine several ways](./remote-access.md#reach-one-machine-several-ways).
 
-## The tunnel works, but T3 Code does not answer
+## The tunnel works, but noTeleme3-code does not answer
 
-The host's tunnel is up, but it cannot reach T3 Code on the host. Common causes:
+The host's tunnel is up, but it cannot reach noTeleme3-code on the host. Common causes:
 
-- T3 Code on the host stopped, crashed, or is still starting.
-- T3 Code restarted on a different port, for example after an update, and the
+- noTeleme3-code on the host stopped, crashed, or is still starting.
+- noTeleme3-code restarted on a different port, for example after an update, and the
   tunnel still points at the old port.
 - The server binds only one network address with `T3CODE_HOST`. The tunnel
   sends requests to `127.0.0.1`, so the server must also listen there.
 
-Fix: restart T3 Code on the host. For the background service, run
+Fix: restart noTeleme3-code on the host. For the background service, run
 `t3 service restart`. Then run `t3 connect status` on the host.
 
 ## The T3 Connect address does not resolve or answer
@@ -83,7 +83,7 @@ Fix:
 4. If it says the address no longer points to this machine's tunnel, the
    environment was likely removed from T3 Connect. Link it again: on a desktop
    host, turn **T3 Connect** off and on in **Settings > Sharing & access**. On a
-   command-line host, run `t3 connect link`, then restart T3 Code.
+   command-line host, run `t3 connect link`, then restart noTeleme3-code.
 
 ## This device can't reach T3 Connect
 
@@ -115,21 +115,21 @@ an active link between your account and the host.
   On the host, open **Settings > Sharing & access** and turn **T3 Connect** on, or
   run `t3 connect`.
 - **The host was linked, but the server did not apply the link yet.** Restart
-  the server on the host: quit and reopen the T3 Code desktop app, run
+  the server on the host: quit and reopen the noTeleme3-code desktop app, run
   `t3 service restart`, or stop `t3 serve` and run it again.
 - **This device's sign-in expired, or the host no longer accepts this
   device.** Sign out of T3 Connect and sign in again.
 - **This device is still loading its T3 Connect sign-in.** Wait a moment;
-  T3 Code retries on its own. If it keeps waiting, reload or restart T3 Code on
+  noTeleme3-code retries on its own. If it keeps waiting, reload or restart noTeleme3-code on
   this device.
 - **The host is waiting for you to approve this device.** The host requires
   approval for new devices. Approve the code this device shows from a device
   that is already connected, or run `t3 auth connect-device approve <code>` on
   the host. See [Approve new devices](./remote-access.md#approve-new-devices).
 - **Your account reached its tunnel limit.** Remove an environment you do not
-  use from your T3 account's T3 Connect page, or
+  use from your noTeleme3-code account's T3 Connect page, or
   [link a paid T3 Chat account](./remote-access.md#more-machines-with-t3-chat)
-  for a higher limit. Then restart T3 Code on the host.
+  for a higher limit. Then restart noTeleme3-code on the host.
 
 ## The clock is off
 
@@ -137,25 +137,25 @@ T3 Connect signs requests with short-lived proofs. When the clock on this
 device or the host is a few minutes wrong, T3 Connect rejects them. Turn on
 automatic date and time on both devices, then retry.
 
-## The host runs an older T3 Code
+## The host runs an older noTeleme3-code
 
-This app needs a newer T3 Code on the host. Update T3 Code on the host. See
-[Updating T3 Code](./updating.md).
+This app needs a newer noTeleme3-code on the host. Update noTeleme3-code on the host. See
+[Updating noTeleme3-code](./updating.md).
 
 ## T3 Connect returned an error
 
-| Error                                                     | Fix                                                                                                                                                                                                  |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `environment_link_limit_exceeded` or managed tunnel limit | Remove an unused environment or link a paid T3 Chat account, then restart T3 Code on the host.                                                                                                       |
-| `auth_invalid` or `invalid_bearer`                        | Run `t3 connect login`. If credentials were revoked, run `t3 connect logout`, then `t3 connect` again. Restart the server after signing in.                                                          |
-| Expired or invalid link proof                             | Check the host's date and time, update T3 Code, then restart it.                                                                                                                                     |
-| HTTP 403 without a recognized error                       | If the host requires approval for new devices, update T3 Code on this device and approve it. Otherwise check relay access, proxies, and firewall rules. Keep any Cloudflare Ray ID for a bug report. |
-| HTTP 408, 429, or 5xx                                     | Wait a few minutes. T3 Code retries temporary failures on its own.                                                                                                                                   |
+| Error                                                     | Fix                                                                                                                                                                                                         |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `environment_link_limit_exceeded` or managed tunnel limit | Remove an unused environment or link a paid T3 Chat account, then restart noTeleme3-code on the host.                                                                                                       |
+| `auth_invalid` or `invalid_bearer`                        | Run `t3 connect login`. If credentials were revoked, run `t3 connect logout`, then `t3 connect` again. Restart the server after signing in.                                                                 |
+| Expired or invalid link proof                             | Check the host's date and time, update noTeleme3-code, then restart it.                                                                                                                                     |
+| HTTP 403 without a recognized error                       | If the host requires approval for new devices, update noTeleme3-code on this device and approve it. Otherwise check relay access, proxies, and firewall rules. Keep any Cloudflare Ray ID for a bug report. |
+| HTTP 408, 429, or 5xx                                     | Wait a few minutes. noTeleme3-code retries temporary failures on its own.                                                                                                                                   |
 
 After you fix a permanent rejection, restart the host's server with
 `t3 service restart`. For a foreground server, stop it and run `t3 serve` again.
 
-If T3 Code on the host disappears when SSH closes, see
+If noTeleme3-code on the host disappears when SSH closes, see
 [background-service troubleshooting](./background-service.md#troubleshooting).
 
 ## Report a problem

@@ -225,7 +225,7 @@ const publishCmd = Command.make(
 ).pipe(Command.withDescription("Publish the t3 launcher to npm."));
 
 const cli = Command.make("cli").pipe(
-  Command.withDescription("T3 server build & publish CLI."),
+  Command.withDescription("noTeleme3-code server build & publish CLI."),
   Command.withSubcommands([buildCmd, buildExeCmd, publishCmd]),
 );
 

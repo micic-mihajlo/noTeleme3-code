@@ -193,7 +193,7 @@ describe("CodexAdapterV2 runtime policy", () => {
       }),
   );
 
-  it.effect("derives concrete Codex turn policies from every T3 runtime mode", () =>
+  it.effect("derives concrete Codex turn policies from every noTeleme3-code runtime mode", () =>
     Effect.gen(function* () {
       const build = (
         runtimeMode: "approval-required" | "auto-accept-edits" | "auto" | "full-access",
@@ -262,7 +262,7 @@ describe("CodexAdapterV2 runtime policy", () => {
       });
       assert.deepEqual((yield* build("approval-required")).sandboxPolicy, { type: "readOnly" });
       assert.deepEqual((yield* build("full-access")).sandboxPolicy, { type: "dangerFullAccess" });
-      // The folder list reaches the model without T3 Code's MCP tools.
+      // The folder list reaches the model without noTeleme3-code's MCP tools.
       assert.deepEqual(Object.keys(autoAcceptEdits.additionalContext ?? {}), ["t3_code_workspace"]);
       assert.include(
         autoAcceptEdits.additionalContext?.["t3_code_workspace"]?.value,
@@ -712,7 +712,11 @@ function codexReplayPreamble(input: {
         id: 1,
         method: "initialize",
         params: {
-          clientInfo: { name: "T3 Code", title: "T3 Code", version: packageJson.version },
+          clientInfo: {
+            name: "noTeleme3-code",
+            title: "noTeleme3-code",
+            version: packageJson.version,
+          },
           capabilities: {
             experimentalApi: true,
             optOutNotificationMethods: ["turn/diff/updated"],
@@ -729,7 +733,7 @@ function codexReplayPreamble(input: {
       frame: {
         id: 1,
         result: {
-          userAgent: "T3 Code/0.156.1",
+          userAgent: "noTeleme3-code/0.156.1",
           codexHome: "/tmp/codex-home",
           platformFamily: "unix",
           platformOs: "macos",
@@ -1361,7 +1365,8 @@ describe("CodexAdapterV2 session initialize", () => {
               frame: {
                 id: 1,
                 result: {
-                  userAgent: "T3 Code/0.144.3 (Mac OS 15.5.0; x86_64) unknown (T3 Code; 0.1.5)",
+                  userAgent:
+                    "noTeleme3-code/0.144.3 (Mac OS 15.5.0; x86_64) unknown (noTeleme3-code; 0.1.5)",
                   codexHome: "/tmp/codex-home",
                   platformFamily: "unix",
                   platformOs: "macos",
@@ -1385,7 +1390,7 @@ describe("CodexAdapterV2 session initialize", () => {
       assert.instanceOf(failure.cause, ProviderSetupError);
       assert.equal(
         failure.cause.message,
-        "Codex 0.144.3 does not work with this T3 Code release. Update Codex to >=0.159.0, then retry.",
+        "Codex 0.144.3 does not work with this noTeleme3-code release. Update Codex to >=0.159.0, then retry.",
       );
     }).pipe(
       Effect.scoped,
@@ -3759,113 +3764,115 @@ describe("CodexAdapterV2 post-settle continuation", () => {
     ),
   );
 
-  it.effect("names the native thread after the T3 title and retries a failed rename", () =>
-    Effect.gen(function* () {
-      const nativeThreadId = "thread-name-thread";
-      const nameSet = (
-        id: number,
-        name: string,
-        response: "result" | "error",
-      ): Array<CodexReplay.CodexAppServerReplayEntry> => [
-        {
-          type: "expect_outbound",
-          label: "thread/name/set",
-          frame: { id, method: "thread/name/set", params: { threadId: nativeThreadId, name } },
-        },
-        {
-          type: "emit_inbound",
-          label: "thread/name/set",
-          frame:
-            response === "result"
-              ? { id, result: {} }
-              : { id, error: { code: -32601, message: "Method not found" } },
-        },
-      ];
-      const turn = (
-        id: number,
-        nativeTurnId: string,
-      ): Array<CodexReplay.CodexAppServerReplayEntry> => {
-        const entries = codexReplayPreamble({ nativeThreadId, nativeTurnId, prompt: "work" });
-        return [
-          withReplayRequestId(entries[5]!, id),
-          withReplayRequestId(entries[6]!, id),
+  it.effect(
+    "names the native thread after the noTeleme3-code title and retries a failed rename",
+    () =>
+      Effect.gen(function* () {
+        const nativeThreadId = "thread-name-thread";
+        const nameSet = (
+          id: number,
+          name: string,
+          response: "result" | "error",
+        ): Array<CodexReplay.CodexAppServerReplayEntry> => [
+          {
+            type: "expect_outbound",
+            label: "thread/name/set",
+            frame: { id, method: "thread/name/set", params: { threadId: nativeThreadId, name } },
+          },
           {
             type: "emit_inbound",
-            label: "turn/completed",
-            frame: {
-              method: "turn/completed",
-              params: {
-                threadId: nativeThreadId,
-                turn: makeCodexReplayTurn({ id: nativeTurnId, status: "completed" }),
-              },
-            },
+            label: "thread/name/set",
+            frame:
+              response === "result"
+                ? { id, result: {} }
+                : { id, error: { code: -32601, message: "Method not found" } },
           },
         ];
-      };
-      const names: Array<unknown> = [];
-      const harness = yield* makeCodexReplayHarness(
-        makeCodexReplayTranscript({
-          scenario: "codex-thread-name",
-          entries: [
-            ...codexReplayPreamble({
-              nativeThreadId,
-              nativeTurnId: "unused",
-              prompt: "work",
-            }).slice(0, 5),
-            ...nameSet(3, CODEX_TEST_THREAD_TITLE, "error"),
-            ...turn(4, "thread-name-turn-1"),
-            ...nameSet(5, CODEX_TEST_THREAD_TITLE, "result"),
-            ...turn(6, "thread-name-turn-2"),
-            ...turn(7, "thread-name-turn-3"),
-            ...nameSet(8, "Renamed", "result"),
-          ],
-        }),
-        () => Effect.void,
-        (method, params) =>
-          Effect.sync(() => {
-            if (method === "thread/name/set") names.push(params);
+        const turn = (
+          id: number,
+          nativeTurnId: string,
+        ): Array<CodexReplay.CodexAppServerReplayEntry> => {
+          const entries = codexReplayPreamble({ nativeThreadId, nativeTurnId, prompt: "work" });
+          return [
+            withReplayRequestId(entries[5]!, id),
+            withReplayRequestId(entries[6]!, id),
+            {
+              type: "emit_inbound",
+              label: "turn/completed",
+              frame: {
+                method: "turn/completed",
+                params: {
+                  threadId: nativeThreadId,
+                  turn: makeCodexReplayTurn({ id: nativeTurnId, status: "completed" }),
+                },
+              },
+            },
+          ];
+        };
+        const names: Array<unknown> = [];
+        const harness = yield* makeCodexReplayHarness(
+          makeCodexReplayTranscript({
+            scenario: "codex-thread-name",
+            entries: [
+              ...codexReplayPreamble({
+                nativeThreadId,
+                nativeTurnId: "unused",
+                prompt: "work",
+              }).slice(0, 5),
+              ...nameSet(3, CODEX_TEST_THREAD_TITLE, "error"),
+              ...turn(4, "thread-name-turn-1"),
+              ...nameSet(5, CODEX_TEST_THREAD_TITLE, "result"),
+              ...turn(6, "thread-name-turn-2"),
+              ...turn(7, "thread-name-turn-3"),
+              ...nameSet(8, "Renamed", "result"),
+            ],
           }),
-      );
-      const now = yield* DateTime.now;
-      for (const ordinal of [1, 2, 3]) {
-        yield* harness.runtime.startTurn({
-          ...makeCodexTestTurnInput({
-            threadId: harness.threadId,
-            providerThread: harness.providerThread,
-            now,
-            attemptId: RunAttemptId.make(`thread-name-${ordinal}`),
-            text: "work",
-          }),
-          runOrdinal: ordinal,
-          providerTurnOrdinal: ordinal,
-        });
-        yield* harness.awaitTerminal(ordinal);
-      }
-      const applyThreadTitle = harness.runtime.applyThreadTitle;
-      assert.isDefined(applyThreadTitle);
-      for (const title of ["Renamed", "Renamed"]) {
-        yield* applyThreadTitle({ providerThread: harness.providerThread, title });
-      }
+          () => Effect.void,
+          (method, params) =>
+            Effect.sync(() => {
+              if (method === "thread/name/set") names.push(params);
+            }),
+        );
+        const now = yield* DateTime.now;
+        for (const ordinal of [1, 2, 3]) {
+          yield* harness.runtime.startTurn({
+            ...makeCodexTestTurnInput({
+              threadId: harness.threadId,
+              providerThread: harness.providerThread,
+              now,
+              attemptId: RunAttemptId.make(`thread-name-${ordinal}`),
+              text: "work",
+            }),
+            runOrdinal: ordinal,
+            providerTurnOrdinal: ordinal,
+          });
+          yield* harness.awaitTerminal(ordinal);
+        }
+        const applyThreadTitle = harness.runtime.applyThreadTitle;
+        assert.isDefined(applyThreadTitle);
+        for (const title of ["Renamed", "Renamed"]) {
+          yield* applyThreadTitle({ providerThread: harness.providerThread, title });
+        }
 
-      assert.deepEqual(names, [
-        { threadId: nativeThreadId, name: CODEX_TEST_THREAD_TITLE },
-        { threadId: nativeThreadId, name: CODEX_TEST_THREAD_TITLE },
-        { threadId: nativeThreadId, name: "Renamed" },
-      ]);
-      assert.deepEqual(
-        harness.terminalEvents().map((event) => event.status),
-        ["completed", "completed", "completed"],
-      );
-    }).pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          IdAllocator.layer,
-          McpProviderSessions.layer,
-          NodeServices.layer,
-          NodeCrypto.layer,
+        assert.deepEqual(names, [
+          { threadId: nativeThreadId, name: CODEX_TEST_THREAD_TITLE },
+          { threadId: nativeThreadId, name: CODEX_TEST_THREAD_TITLE },
+          { threadId: nativeThreadId, name: "Renamed" },
+        ]);
+        assert.deepEqual(
+          harness.terminalEvents().map((event) => event.status),
+          ["completed", "completed", "completed"],
+        );
+      }).pipe(
+        Effect.provide(
+          Layer.mergeAll(
+            IdAllocator.layer,
+            McpProviderSessions.layer,
+            NodeServices.layer,
+            NodeCrypto.layer,
+          ),
         ),
       ),
-    ),
   );
 
   it.effect("signs a Codex MCP server in only while it isn't connected in the thread", () =>
@@ -4402,7 +4409,7 @@ describe("CodexAdapterV2 post-settle continuation", () => {
     ),
   );
 
-  it.effect("preserves T3 context on the wire and restores it after compaction", () =>
+  it.effect("preserves noTeleme3-code context on the wire and restores it after compaction", () =>
     Effect.gen(function* () {
       const nativeThreadId = "context-thread";
       const nativeTurnId = "context-turn";
@@ -4543,7 +4550,7 @@ describe("CodexAdapterV2 post-settle continuation", () => {
       assert.deepEqual(
         wireOrder,
         ["item/completed", "turn/completed", "thread/inject_items"],
-        "restored T3 context while the compacting native turn was still running",
+        "restored noTeleme3-code context while the compacting native turn was still running",
       );
     }).pipe(
       Effect.provide(
@@ -4680,7 +4687,7 @@ describe("CodexAdapterV2 post-settle continuation", () => {
                   item: {
                     type: itemType,
                     id,
-                    ...(itemType === "webSearch" ? { query: "T3 Code", action: null } : {}),
+                    ...(itemType === "webSearch" ? { query: "noTeleme3-code", action: null } : {}),
                   },
                   ...timestamps,
                 },
@@ -4767,7 +4774,7 @@ describe("CodexAdapterV2 post-settle continuation", () => {
         assert.equal(unfinished[0]?.id, unfinished[1]?.id);
         assert.deepEqual(unfinished[1]?.startedAt, DateTime.makeUnsafe(1782622443000));
         if (unfinished[1]?.type === "web_search") {
-          assert.deepEqual(unfinished[1].patterns, ["T3 Code"]);
+          assert.deepEqual(unfinished[1].patterns, ["noTeleme3-code"]);
           assert.deepEqual(
             harness.events.flatMap((event) =>
               event.type === "node.updated" &&

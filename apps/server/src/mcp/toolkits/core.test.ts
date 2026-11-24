@@ -1331,7 +1331,7 @@ it.effect.each(["t3_thread_interrupt", "t3_workflow_stop"])(
 );
 
 it.effect(
-  "t3_background_wait marks work from a turn Claude started before T3 started its run",
+  "t3_background_wait marks work from a turn Claude started before noTeleme3-code started its run",
   () =>
     Effect.gen(function* () {
       const server = yield* McpServer.McpServer;

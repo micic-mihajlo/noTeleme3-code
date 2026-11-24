@@ -129,7 +129,7 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
       yield* Effect.all([command.addToPath, command.addToPath], { concurrency: "unbounded" });
       expect((yield* command.addToPath).pathSetup).toEqual({ file: "~/.zshrc", added: true });
       expect(yield* fs.readFileString(zshrc)).toBe(
-        '# mine\n# Added by T3 Code\nexport PATH="$PATH:$HOME/.local/bin"\n',
+        '# mine\n# Added by noTeleme3-code\nexport PATH="$PATH:$HOME/.local/bin"\n',
       );
 
       expect((yield* command.uninstall).installedPath).toBeNull();
@@ -205,7 +205,7 @@ it.layer(NodeServices.layer)("DesktopCliCommand", (it) => {
     }),
   );
 
-  it.effect("finds and removes a link left by a previous T3 home", () =>
+  it.effect("finds and removes a link left by a previous noTeleme3-code home", () =>
     Effect.gen(function* () {
       const env: NodeJS.ProcessEnv = { PATH: "", SHELL: "/bin/zsh" };
       const fs = yield* FileSystem.FileSystem;

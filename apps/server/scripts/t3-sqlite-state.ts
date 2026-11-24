@@ -53,7 +53,7 @@ export class SqliteStateDatabaseMissingError extends Schema.TaggedError<SqliteSt
   },
 ) {
   override get message(): string {
-    return `Database does not exist at '${this.databasePath}'. Start T3 once to run migrations.`;
+    return `Database does not exist at '${this.databasePath}'. Start noTeleme3-code once to run migrations.`;
   }
 }
 
@@ -254,7 +254,9 @@ const t3SqliteStateCommand = Command.make(
       Argument.withDescription("Run a read-only query or a backed-up fixture mutation."),
     ),
     baseDir: Flag.String("base-dir").pipe(
-      Flag.withDescription("Explicit T3 base directory containing userdata/statev2.sqlite."),
+      Flag.withDescription(
+        "Explicit noTeleme3-code base directory containing userdata/statev2.sqlite.",
+      ),
     ),
     sql: Flag.String("sql").pipe(
       Flag.optional,

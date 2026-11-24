@@ -61,7 +61,7 @@ const windowsTaskOptions = {
   conhostPath: "C:\\Windows\\System32\\conhost.exe",
 };
 
-it("reads the served T3 home and log back out of a rendered unit, plist, or task", () => {
+it("reads the served noTeleme3-code home and log back out of a rendered unit, plist, or task", () => {
   const plan = (baseDir: string) => ({
     program: [`${baseDir}/runtime/versions/1.2.3/t3`, "__service-launcher"],
     baseDir,
@@ -98,9 +98,12 @@ it("reads the served T3 home and log back out of a rendered unit, plist, or task
   ).toBe("/Users/theo/a&b");
   expect(
     BootService.bootServiceBaseDirOf(
-      BootService.renderBootServiceTask(plan("C:\\Users\\theo\\T3 a&b\\"), windowsTaskOptions),
+      BootService.renderBootServiceTask(
+        plan("C:\\Users\\theo\\noTeleme3-code a&b\\"),
+        windowsTaskOptions,
+      ),
     ),
-  ).toBe("C:\\Users\\theo\\T3 a&b\\");
+  ).toBe("C:\\Users\\theo\\noTeleme3-code a&b\\");
   expect(BootService.bootServiceBaseDirOf("[Service]\nExecStart=/x\n")).toBeUndefined();
 });
 
@@ -133,7 +136,7 @@ it.each([
   ],
   [
     "a task",
-    "C:\\Users\\theo\\T3 a&b <c>",
+    "C:\\Users\\theo\\noTeleme3-code a&b <c>",
     (plan: BootService.BootServicePlan) =>
       BootService.renderBootServiceTask(plan, windowsTaskOptions),
   ],
@@ -152,7 +155,7 @@ it.each([
   ["a single quote", "/home/theo/Theo's T3"],
   ["a backslash", "/home/theo/T3\\Data"],
   ["a newline", "/home/theo/T3\nData"],
-])("renders a loadable unit, or refuses, for a T3 home with %s", (_, baseDir) => {
+])("renders a loadable unit, or refuses, for a noTeleme3-code home with %s", (_, baseDir) => {
   let unit: string;
   try {
     unit = BootService.renderBootServiceUnit({
@@ -1282,36 +1285,38 @@ process.disconnect();
     }),
   );
 
-  it.effect("restart and install leave a service that serves another T3 home alone", () =>
-    Effect.gen(function* () {
-      const { service, fs, baseDir, commands, makeService } = yield* makeHarness();
-      const plan = yield* service.install();
-      const unit = yield* fs.readFileString(plan.unitPath);
-      const path = yield* Path.Path;
-      const otherHome = yield* fs.makeTempDirectoryScoped({ prefix: "t3-other-home-" });
+  it.effect(
+    "restart and install leave a service that serves another noTeleme3-code home alone",
+    () =>
+      Effect.gen(function* () {
+        const { service, fs, baseDir, commands, makeService } = yield* makeHarness();
+        const plan = yield* service.install();
+        const unit = yield* fs.readFileString(plan.unitPath);
+        const path = yield* Path.Path;
+        const otherHome = yield* fs.makeTempDirectoryScoped({ prefix: "t3-other-home-" });
 
-      const other = yield* makeService(undefined, "1.2.3", path.join(otherHome, ".t3"));
-      commands.length = 0;
-      expect(yield* other.restart).toBe("skipped");
-      const refused = yield* other.install().pipe(Effect.flip);
-      expect(refused._tag).toBe("BootServiceOtherBaseDirError");
-      // The CLI prints a user message without a stack trace.
-      expect(CliError.getUserMessage(refused)).toBe(refused.message);
-      expect(yield* fs.readFileString(plan.unitPath)).toBe(unit);
-      expect(commands).toEqual([]);
-      expect((yield* other.status).otherBaseDir).toBe(baseDir);
+        const other = yield* makeService(undefined, "1.2.3", path.join(otherHome, ".t3"));
+        commands.length = 0;
+        expect(yield* other.restart).toBe("skipped");
+        const refused = yield* other.install().pipe(Effect.flip);
+        expect(refused._tag).toBe("BootServiceOtherBaseDirError");
+        // The CLI prints a user message without a stack trace.
+        expect(CliError.getUserMessage(refused)).toBe(refused.message);
+        expect(yield* fs.readFileString(plan.unitPath)).toBe(unit);
+        expect(commands).toEqual([]);
+        expect((yield* other.status).otherBaseDir).toBe(baseDir);
 
-      const quoted = yield* makeService(undefined, "1.2.3", path.join(otherHome, 'T3 "Data"'));
-      commands.length = 0;
-      const unloadable = yield* quoted.install().pipe(Effect.flip);
-      expect(unloadable._tag).toBe("BootServiceBaseDirUnsupportedError");
-      expect(CliError.getUserMessage(unloadable)).toBe(unloadable.message);
-      expect(yield* fs.readFileString(plan.unitPath)).toBe(unit);
-      expect(commands).toEqual([]);
-    }),
+        const quoted = yield* makeService(undefined, "1.2.3", path.join(otherHome, 'T3 "Data"'));
+        commands.length = 0;
+        const unloadable = yield* quoted.install().pipe(Effect.flip);
+        expect(unloadable._tag).toBe("BootServiceBaseDirUnsupportedError");
+        expect(CliError.getUserMessage(unloadable)).toBe(unloadable.message);
+        expect(yield* fs.readFileString(plan.unitPath)).toBe(unit);
+        expect(commands).toEqual([]);
+      }),
   );
 
-  it.effect("treats a symlinked T3 home path as the same home", () =>
+  it.effect("treats a symlinked noTeleme3-code home path as the same home", () =>
     Effect.gen(function* () {
       const { service, fs, baseDir, commands, makeService } = yield* makeHarness();
       yield* service.install();

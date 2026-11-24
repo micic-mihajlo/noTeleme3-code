@@ -1545,7 +1545,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
       const watch = yield* watchBackgroundTurn(runtime);
       yield* runtime.startTurn(withLineage(thread));
       yield* watch.attached;
-      // The child's nested T3 MCP results live under the root thread and outlive its turn.
+      // The child's nested noTeleme3-code MCP results live under the root thread and outlive its turn.
       const childResult = { message: "Child note" };
       yield* mcpSessions.recordToolResult(threadId, "send_to_user", childResult, {
         sentMessage: childResult.message,
@@ -2353,7 +2353,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
   );
 
   it.effect.each(["running", "exited", "timeout", "held", "sync"] as const)(
-    "marks a shell OpenCode started on its own before T3 runs the wake, shell %s",
+    "marks a shell OpenCode started on its own before noTeleme3-code runs the wake, shell %s",
     (shell) =>
       Effect.gen(function* () {
         const shellID = "sh_wake";
@@ -3041,7 +3041,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
     }),
   );
 
-  it.effect("gives a resumed session T3's rules when it was made with others", () =>
+  it.effect("gives a resumed session noTeleme3-code's rules when it was made with others", () =>
     Effect.gen(function* () {
       const runtime = yield* openCode2ReplayRuntimeWithInstructions([
         ...opening,
@@ -3112,45 +3112,47 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
     }),
   );
 
-  it.effect("stops the requests a session still waits on when a restarted T3 loads it", () =>
-    Effect.gen(function* () {
-      const runtime = yield* openCode2ReplayRuntimeWithInstructions(
-        [
-          ...opening,
-          out("session.get", { sessionID: SESSION }),
-          replyData("session.get", sessionInfo()),
-          out("permission.list", { sessionID: SESSION }),
-          replyData("permission.list", [shellAsk.data]),
-          out("session.form.list", { sessionID: SESSION }),
-          replyData("session.form.list", [colorForm]),
-          out("permission.reply", {
-            sessionID: SESSION,
-            requestID: shellAsk.data.id,
-            decision: "reject",
-          }),
-          reply("permission.reply", null),
-          out("session.form.cancel", { sessionID: SESSION, formID: colorForm.id }),
-          reply("session.form.cancel", null),
-          out("session.active"),
-          reply("session.active", { data: {} }),
-          event("session.execution.interrupted", { sessionID: SESSION, reason: "user" }),
-          out("session.prompt", { sessionID: SESSION, text: "<any>" }),
-          promptAccepted,
-          event("session.execution.started", { sessionID: SESSION }),
-          event("session.execution.succeeded", { sessionID: SESSION }),
-        ],
-        { external: true },
-      );
-      const thread = yield* runtime.resumeThread({
-        providerThread: providerThread(yield* DateTime.now),
-        threadId,
-        modelSelection: bigPickle,
-        runtimePolicy: policy(),
-      });
-      const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
-      yield* runtime.startTurn(turnInput(thread));
-      assert.equal((yield* Fiber.join(terminal))?.status, "completed");
-    }),
+  it.effect(
+    "stops the requests a session still waits on when a restarted noTeleme3-code loads it",
+    () =>
+      Effect.gen(function* () {
+        const runtime = yield* openCode2ReplayRuntimeWithInstructions(
+          [
+            ...opening,
+            out("session.get", { sessionID: SESSION }),
+            replyData("session.get", sessionInfo()),
+            out("permission.list", { sessionID: SESSION }),
+            replyData("permission.list", [shellAsk.data]),
+            out("session.form.list", { sessionID: SESSION }),
+            replyData("session.form.list", [colorForm]),
+            out("permission.reply", {
+              sessionID: SESSION,
+              requestID: shellAsk.data.id,
+              decision: "reject",
+            }),
+            reply("permission.reply", null),
+            out("session.form.cancel", { sessionID: SESSION, formID: colorForm.id }),
+            reply("session.form.cancel", null),
+            out("session.active"),
+            reply("session.active", { data: {} }),
+            event("session.execution.interrupted", { sessionID: SESSION, reason: "user" }),
+            out("session.prompt", { sessionID: SESSION, text: "<any>" }),
+            promptAccepted,
+            event("session.execution.started", { sessionID: SESSION }),
+            event("session.execution.succeeded", { sessionID: SESSION }),
+          ],
+          { external: true },
+        );
+        const thread = yield* runtime.resumeThread({
+          providerThread: providerThread(yield* DateTime.now),
+          threadId,
+          modelSelection: bigPickle,
+          runtimePolicy: policy(),
+        });
+        const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
+        yield* runtime.startTurn(turnInput(thread));
+        assert.equal((yield* Fiber.join(terminal))?.status, "completed");
+      }),
   );
 
   it.effect("ends the turn when an answer to its request cannot be delivered", () =>
@@ -3187,7 +3189,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
       assert.equal(ended?.status, "failed");
       assert.equal(
         ended?.status === "failed" ? ended.failure.message : undefined,
-        "OpenCode is waiting on a request T3 Code couldn't answer.",
+        "OpenCode is waiting on a request noTeleme3-code couldn't answer.",
       );
     }),
   );
@@ -3225,42 +3227,44 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
     }),
   );
 
-  it.effect("declines a form T3 cannot show with the reason, instead of leaving it open", () =>
-    Effect.gen(function* () {
-      const { runtime, thread } = yield* resumed([
-        out("session.prompt", { sessionID: SESSION, text: "<any>" }),
-        promptAccepted,
-        event("form.created", {
-          form: {
-            id: "frm_0eb79ab35001fkvFECSh3wYNVD",
+  it.effect(
+    "declines a form noTeleme3-code cannot show with the reason, instead of leaving it open",
+    () =>
+      Effect.gen(function* () {
+        const { runtime, thread } = yield* resumed([
+          out("session.prompt", { sessionID: SESSION, text: "<any>" }),
+          promptAccepted,
+          event("form.created", {
+            form: {
+              id: "frm_0eb79ab35001fkvFECSh3wYNVD",
+              sessionID: SESSION,
+              title: "MCP authorization",
+              metadata: { kind: "mcp" },
+              fields: [
+                {
+                  key: "authorization",
+                  type: "external",
+                  url: "https://example.com/authorize",
+                  title: "Authorize",
+                },
+              ],
+            },
+          }),
+          out("session.form.cancel", {
             sessionID: SESSION,
-            title: "MCP authorization",
-            metadata: { kind: "mcp" },
-            fields: [
-              {
-                key: "authorization",
-                type: "external",
-                url: "https://example.com/authorize",
-                title: "Authorize",
-              },
-            ],
-          },
-        }),
-        out("session.form.cancel", {
-          sessionID: SESSION,
-          formID: "frm_0eb79ab35001fkvFECSh3wYNVD",
-        }),
-        reply("session.form.cancel", null),
-      ]);
-      const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
-      yield* runtime.startTurn(turnInput(thread));
-      const ended = yield* Fiber.join(terminal);
-      assert.equal(ended?.status, "failed");
-      assert.include(
-        ended?.status === "failed" ? ended.failure.message : "",
-        "asked for a link to open",
-      );
-    }),
+            formID: "frm_0eb79ab35001fkvFECSh3wYNVD",
+          }),
+          reply("session.form.cancel", null),
+        ]);
+        const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
+        yield* runtime.startTurn(turnInput(thread));
+        const ended = yield* Fiber.join(terminal);
+        assert.equal(ended?.status, "failed");
+        assert.include(
+          ended?.status === "failed" ? ended.failure.message : "",
+          "asked for a link to open",
+        );
+      }),
   );
 
   it.effect("answers an optional multiselect with none and keeps a minimum choice required", () =>
@@ -5811,69 +5815,75 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
     }),
   );
 
-  it.effect("re-registers T3 MCP each turn and drops its instructions when adding fails", () =>
-    Effect.gen(function* () {
-      const mcpSessions = yield* McpProviderSessions.McpProviderSessions;
-      yield* mcpSessions.set({
-        environmentId: EnvironmentId.make("environment:opencode2-adapter"),
-        threadId,
-        providerSessionId: "mcp:opencode2-adapter",
-        providerInstanceId: instanceId,
-        endpoint: "http://127.0.0.1:3773/mcp",
-        authorizationHeader: "Bearer thread-credential",
-        browserToolsAvailable: false,
-      });
-      yield* Effect.addFinalizer(() => mcpSessions.clear(threadId));
-      const server = "t3-code-thread_opencode2-adapter";
-      const add = out("mcp.add", {
-        server,
-        "location[directory]": WORK,
-        config: {
-          type: "remote",
-          url: "http://127.0.0.1:3773/mcp",
-          headers: { Authorization: "Bearer thread-credential" },
-          oauth: false,
-        },
-      });
-      const turn = [
-        out("session.prompt", { sessionID: SESSION, text: "<any>" }),
-        promptAccepted,
-        event("session.execution.succeeded", { sessionID: SESSION }),
-      ];
-      const prompts: Array<unknown> = [];
-      // Idle Location eviction drops OpenCode's runtime MCP servers without a reconnect.
-      const { runtime, thread } = yield* resumed(
-        [
-          add,
-          reply("mcp.add", null),
-          ...turn,
-          add,
-          reply("mcp.add", { status: 500, body: { message: "MCP unavailable" } }),
-          out("session.instructions.entry.put", {
-            sessionID: SESSION,
-            key: "t3-code",
-            value: buildRuntimeInstructions({ harness: "OpenCode", model: bigPickle.model }),
-          }),
-          reply("session.instructions.entry.put", null),
-          ...turn,
-          out("mcp.remove", { server, "location[directory]": WORK }),
-          reply("mcp.remove", null),
-        ],
-        { onPrompt: (input) => prompts.push(input) },
-      );
-      for (let index = 0; index < 2; index++) {
-        const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
-        const started = yield* runtime.startTurn(turnInput(thread)).pipe(Effect.forkScoped);
-        // OpenCode before 2.2.6 loads a newly added server's tools after a debounce.
-        if (index === 0) {
-          yield* TestClock.adjust("249 millis");
-          assert.lengthOf(prompts, 0, "prompted before OpenCode loaded the new MCP server's tools");
-          yield* TestClock.adjust("1 millis");
+  it.effect(
+    "re-registers noTeleme3-code MCP each turn and drops its instructions when adding fails",
+    () =>
+      Effect.gen(function* () {
+        const mcpSessions = yield* McpProviderSessions.McpProviderSessions;
+        yield* mcpSessions.set({
+          environmentId: EnvironmentId.make("environment:opencode2-adapter"),
+          threadId,
+          providerSessionId: "mcp:opencode2-adapter",
+          providerInstanceId: instanceId,
+          endpoint: "http://127.0.0.1:3773/mcp",
+          authorizationHeader: "Bearer thread-credential",
+          browserToolsAvailable: false,
+        });
+        yield* Effect.addFinalizer(() => mcpSessions.clear(threadId));
+        const server = "t3-code-thread_opencode2-adapter";
+        const add = out("mcp.add", {
+          server,
+          "location[directory]": WORK,
+          config: {
+            type: "remote",
+            url: "http://127.0.0.1:3773/mcp",
+            headers: { Authorization: "Bearer thread-credential" },
+            oauth: false,
+          },
+        });
+        const turn = [
+          out("session.prompt", { sessionID: SESSION, text: "<any>" }),
+          promptAccepted,
+          event("session.execution.succeeded", { sessionID: SESSION }),
+        ];
+        const prompts: Array<unknown> = [];
+        // Idle Location eviction drops OpenCode's runtime MCP servers without a reconnect.
+        const { runtime, thread } = yield* resumed(
+          [
+            add,
+            reply("mcp.add", null),
+            ...turn,
+            add,
+            reply("mcp.add", { status: 500, body: { message: "MCP unavailable" } }),
+            out("session.instructions.entry.put", {
+              sessionID: SESSION,
+              key: "t3-code",
+              value: buildRuntimeInstructions({ harness: "OpenCode", model: bigPickle.model }),
+            }),
+            reply("session.instructions.entry.put", null),
+            ...turn,
+            out("mcp.remove", { server, "location[directory]": WORK }),
+            reply("mcp.remove", null),
+          ],
+          { onPrompt: (input) => prompts.push(input) },
+        );
+        for (let index = 0; index < 2; index++) {
+          const terminal = yield* terminalOf(runtime).pipe(Effect.forkScoped);
+          const started = yield* runtime.startTurn(turnInput(thread)).pipe(Effect.forkScoped);
+          // OpenCode before 2.2.6 loads a newly added server's tools after a debounce.
+          if (index === 0) {
+            yield* TestClock.adjust("249 millis");
+            assert.lengthOf(
+              prompts,
+              0,
+              "prompted before OpenCode loaded the new MCP server's tools",
+            );
+            yield* TestClock.adjust("1 millis");
+          }
+          yield* Fiber.join(started);
+          assert.equal((yield* Fiber.join(terminal))?.status, "completed");
         }
-        yield* Fiber.join(started);
-        assert.equal((yield* Fiber.join(terminal))?.status, "completed");
-      }
-    }),
+      }),
   );
 
   it.effect("registers a long thread id's MCP server under a name OpenCode accepts", () =>
@@ -5941,7 +5951,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
     }),
   );
 
-  // regression: #16142 OpenCode 2 threads were missing T3 Code's MCP tools
+  // regression: #16142 OpenCode 2 threads were missing noTeleme3-code's MCP tools
   it.effect("names each thread's MCP server within OpenCode's limits, one name per thread", () =>
     Effect.gen(function* () {
       const project = "thread:project:ce04e4e2-6c29-4ff0-a1d7-b089dd63e258";
@@ -6822,7 +6832,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
           status: 500,
           body: { _tag: "UnknownError", message: "disk I/O error" },
         }),
-        // Uncleared stages commit on the next prompt; clearing triggers an empty execution without a T3 turn.
+        // Uncleared stages commit on the next prompt; clearing triggers an empty execution without a noTeleme3-code turn.
         out("session.revert.clear", { sessionID: SESSION }),
         reply("session.revert.clear", null),
         event("session.revert.cleared", { sessionID: SESSION }),
@@ -8308,7 +8318,7 @@ it.layer(McpProviderSessions.layer)("OpenCode2 adapter", (it) => {
           sessionID: SESSION,
           item: { type: "user", payload: { text, files: [] }, delivery: "steer" },
         });
-      // T3's own prompt can be admitted after a failed submit ended its turn.
+      // noTeleme3-code's own prompt can be admitted after a failed submit ended its turn.
       const late = `msg_t3_turn_${SESSION}:attempt:late`;
       const { runtime, thread } = yield* resumed([
         prompt(late, "mine"),

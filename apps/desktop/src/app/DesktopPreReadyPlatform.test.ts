@@ -169,7 +169,7 @@ describe("DesktopPreReadyPlatform", () => {
         const identity = yield* Effect.promise(() => portalIdentity);
         assert.equal(identity.desktopName, "com.t3tools.T3Code.desktop");
         assert.include(identity.desktopEntry ?? "", "Exec=/Applications/current.AppImage %U");
-        assert.include(identity.desktopEntry ?? "", "Name=T3 Code (Beta)");
+        assert.include(identity.desktopEntry ?? "", "Name=noTeleme3-code (Beta)");
         assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/t3code;");
         assert.include(
           identity.desktopEntry ?? "",
@@ -194,7 +194,9 @@ describe("DesktopPreReadyPlatform", () => {
       vi.stubEnv("VITE_DEV_SERVER_URL", "");
       getSwitchValueMock.mockReturnValue("");
       const entryPath = "/xdg/applications/com.t3tools.T3Code.desktop";
-      const files = new Map([[entryPath, "Exec=/Applications/T3-Code-0.1.8-x86_64.AppImage %U\n"]]);
+      const files = new Map([
+        [entryPath, "Exec=/Applications/noTeleme3-code-0.1.8-x86_64.AppImage %U\n"],
+      ]);
       readFileSyncMock.mockImplementation((path: string) => files.get(path) ?? "{}");
       writeFileSyncMock.mockImplementation((path: string, contents: string | Buffer) => {
         files.set(path, String(contents));
@@ -208,7 +210,7 @@ describe("DesktopPreReadyPlatform", () => {
               Layer.provide(
                 DesktopConfig.layerTest({
                   XDG_DATA_HOME: "/xdg",
-                  APPIMAGE: "/Applications/T3-Code-x86_64.AppImage",
+                  APPIMAGE: "/Applications/noTeleme3-code-x86_64.AppImage",
                   APPIMAGE_SILENT_INSTALL: relaunchedByUpdater,
                 }),
               ),
@@ -217,10 +219,18 @@ describe("DesktopPreReadyPlatform", () => {
           assert.deepEqual(
             symlinkSyncMock.mock.calls,
             restored
-              ? [["T3-Code-x86_64.AppImage", "/Applications/T3-Code-0.1.8-x86_64.AppImage"]]
+              ? [
+                  [
+                    "noTeleme3-code-x86_64.AppImage",
+                    "/Applications/noTeleme3-code-0.1.8-x86_64.AppImage",
+                  ],
+                ]
               : [],
           );
-          assert.include(files.get(entryPath), "Exec=/Applications/T3-Code-x86_64.AppImage %U");
+          assert.include(
+            files.get(entryPath),
+            "Exec=/Applications/noTeleme3-code-x86_64.AppImage %U",
+          );
         }),
       ).pipe(Effect.ensuring(Effect.sync(() => vi.unstubAllEnvs())));
     },

@@ -169,10 +169,10 @@ const make = Effect.gen(function* () {
         return (
           client?.label ??
           ([client?.browser, client?.os].filter((part) => part !== undefined).join(" on ") ||
-            "T3 Code client")
+            "noTeleme3-code client")
         );
       }),
-      Effect.orElseSucceed(() => "T3 Code client"),
+      Effect.orElseSucceed(() => "noTeleme3-code client"),
     );
 
   /** Asks the linked environment for a pairing; `payload` says for whom. */

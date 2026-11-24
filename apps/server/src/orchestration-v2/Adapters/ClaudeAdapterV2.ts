@@ -1152,7 +1152,7 @@ function claudeRulesMayCoverMcpTools(
 
 /**
  * Claude reports `annotations` as `readOnly`/`destructive`/`openWorld`; apps expect MCP's `*Hint` names.
- * Card calls skip Claude's permission check, so `readOnlyHint`, which skips T3's prompt, needs readable
+ * Card calls skip Claude's permission check, so `readOnlyHint`, which skips noTeleme3-code's prompt, needs readable
  * rules (null when not) with no ask or deny rule that may cover the tool.
  */
 function claudeMcpToolForApps(
@@ -1599,7 +1599,7 @@ const forkClaudeSessionInWorker = Effect.fn("forkClaudeSessionInWorker")(functio
 
 const CLAUDE_CAN_USE_TOOL_SHADOWED_WARNING = "CLAUDE_SDK_CAN_USE_TOOL_SHADOWED";
 
-// query() warns when canUseTool meets bypassPermissions or bare allowedTools. T3 installs
+// query() warns when canUseTool meets bypassPermissions or bare allowedTools. noTeleme3-code installs
 // canUseTool in every mode on purpose (AskUserQuestion, ask rules), so it is per-session noise.
 export function withoutClaudeCanUseToolShadowedWarning<A>(run: () => A): A {
   const emitWarning = process.emitWarning;
@@ -2405,7 +2405,7 @@ export function claudeQueryEnvironment(
 }
 
 // Claude Code's auto tool search sends every MCP schema in full while they fit under a share of the
-// context window, which T3's tools do on 1M models. auto:0 already means on and auto:100 off.
+// context window, which noTeleme3-code's tools do on 1M models. auto:0 already means on and auto:100 off.
 export function claudeToolSearchOverride(value: string | undefined): "true" | undefined {
   if (value === undefined) return undefined;
   if (value === "auto") return "true";
@@ -2500,7 +2500,7 @@ const CLAUDE_BACKGROUND_WAIT_INSTRUCTIONS = `
 
 ### Background work you wait on
 
-To wait for a background command or Monitor you started (tests, a build), call \`t3_background_wait\` with its task ID before you end your turn. Do not mark work you leave running, or PRs. T3 MCP tools are deferred: load one with ToolSearch before you call it.
+To wait for a background command or Monitor you started (tests, a build), call \`t3_background_wait\` with its task ID before you end your turn. Do not mark work you leave running, or PRs. noTeleme3-code MCP tools are deferred: load one with ToolSearch before you call it.
 `;
 
 // Claude 5.1+ returns text written before a tool call as a progress update, which the API
@@ -2537,7 +2537,7 @@ export function makeClaudeQueryOptions(input: {
   readonly environment?: NodeJS.ProcessEnv;
   readonly mcpServers?: ClaudeQueryOptions["mcpServers"];
   readonly agentFeedback?: AgentFeedbackMode;
-  /** The thread's T3 MCP session holds the `device` capability. */
+  /** The thread's noTeleme3-code MCP session holds the `device` capability. */
   readonly deviceToolsAvailable?: boolean;
   readonly tools?: ClaudeAgentSdkQueryTools;
   readonly allowedTools?: ReadonlyArray<string>;
@@ -2645,7 +2645,7 @@ export function makeClaudeQueryOptions(input: {
   const agentFeedback = input.mcpServers === undefined ? "off" : (input.agentFeedback ?? "off");
   const options: ClaudeAgentSdkQueryOptions = {
     model: compiledSelection.apiModelId,
-    // T3 names threads; a supplied title skips Claude's redundant naming request.
+    // noTeleme3-code names threads; a supplied title skips Claude's redundant naming request.
     ...(input.title === undefined ? {} : { title: input.title }),
     tools: claudeAgentSdkQueryToolsForSdk(selectedTools),
     permissionMode:
@@ -2786,7 +2786,7 @@ const decodeClaudeLaunchArgSettings = Schema.decodeUnknownEffect(
  * Reads the --settings launch argument: a value starting with a brace is inline
  * JSON, anything else is a file path that expands a leading ~ and is otherwise
  * relative to the thread's cwd (the project or its worktree).
- * makeClaudeQueryOptions merges the result beneath T3's own settings.
+ * makeClaudeQueryOptions merges the result beneath noTeleme3-code's own settings.
  */
 export const readClaudeLaunchArgSettings = Effect.fn("ClaudeAdapterV2.readLaunchArgSettings")(
   function* (input: {
@@ -2846,7 +2846,7 @@ export const CLAUDE_READ_ONLY_T3_MCP_ALLOWED_TOOLS: ReadonlyArray<string> = [
 // request_secret can wait an hour; exceed Claude's default 60 s timeout.
 export const CLAUDE_T3_MCP_TOOL_TIMEOUT_MS = 65 * 60 * 1_000;
 
-// allowedTools pre-approves calls; tools controls availability. Pre-approve T3 tools for headless modes,
+// allowedTools pre-approves calls; tools controls availability. Pre-approve noTeleme3-code tools for headless modes,
 // limited to annotated read-only tools in read-only sandboxes.
 
 export function claudeMcpQueryOverrides(input: {
@@ -4749,7 +4749,7 @@ export function permissionResultFromDecision(input: {
   readonly toolUseID: string;
   readonly suggestions?: Parameters<CanUseTool>[2]["suggestions"];
   readonly feedback?: string;
-  /** Under an administrator's ceiling, T3 Code's mode is the only one; Claude cannot switch it. */
+  /** Under an administrator's ceiling, noTeleme3-code's mode is the only one; Claude cannot switch it. */
   readonly managedCeiling?: boolean;
 }): PermissionResult {
   if (input.decision === "accept" || input.decision === "acceptForSession") {
@@ -5817,7 +5817,7 @@ function claudeTaskString(value: unknown, key: string): string | undefined {
 }
 
 // A Claude Code mod can hold a tool call until the user acts in its terminal
-// pane. T3 cannot provide the requested pane interaction.
+// pane. noTeleme3-code cannot provide the requested pane interaction.
 // Passive panes never request focus and keep working.
 function claudeFocusRequestedPanePlugin(message: SDKMessage): string | null {
   if (message.type !== "system" || claudeTaskField(message, "subtype") !== "ui_panes") return null;
@@ -6388,8 +6388,8 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
           new Map<string, OrchestrationV2ProviderThread>(),
         );
         const goalsByNativeThread = new Map<string, OrchestrationV2ProviderGoal | null>();
-        // The title T3 last applied to each native session, so a turn renames it only when the
-        // thread title changed. A native `/rename` T3 never applied survives later turns.
+        // The title noTeleme3-code last applied to each native session, so a turn renames it only when the
+        // thread title changed. A native `/rename` noTeleme3-code never applied survives later turns.
         const appliedSessionTitles = new Map<string, string>();
         const goalCheckedTurns = new Set<string>();
         // Background subagents can finish after root settlement; retain their registry for wake evidence and hydration.
@@ -11340,7 +11340,7 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
               failure: makeProviderFailure({
                 class: "provider_error",
                 code: "claude_mod_ui_unsupported",
-                message: `The Claude Code mod "${focusedPlugin}" is waiting for input in its terminal pane, which T3 Code cannot show. Disable the mod for sessions run from T3 Code, or run the task in the Claude Code terminal.`,
+                message: `The Claude Code mod "${focusedPlugin}" is waiting for input in its terminal pane, which noTeleme3-code cannot show. Disable the mod for sessions run from noTeleme3-code, or run the task in the Claude Code terminal.`,
               }),
             });
             // Closing ends the CLI process and abandons the held tool call
@@ -13180,7 +13180,7 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
             yield* releaseHeldRootFrames(context);
           }
 
-          // The SDK's requestId names this control request; T3 allocates its own
+          // The SDK's requestId names this control request; noTeleme3-code allocates its own
           // runtime request id from it.
           const nativeRequestId = `mcp-elicitation:${callbackOptions.requestId}`;
           const artifacts = yield* buildApprovalRequestArtifacts({
@@ -13502,7 +13502,7 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
         ) {
           const mcpSession = yield* mcpSessions.read(turnInput.threadId);
           // Claude Code defers its goal Stop hook only for its own background tasks, so a goal
-          // re-prompts in a loop while T3 work that will wake this thread is still running.
+          // re-prompts in a loop while noTeleme3-code work that will wake this thread is still running.
           const onStop: HookCallback = () =>
             runPromise(
               Effect.gen(function* () {
@@ -14200,7 +14200,7 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
                 }
                 const nativeItemId = `bypass-policy-downgrade:${context.providerTurnId}`;
                 const notice =
-                  "T3 could not confirm Claude bypass permissions here, so Full access is running with approval checks.";
+                  "noTeleme3-code could not confirm Claude bypass permissions here, so Full access is running with approval checks.";
                 yield* emitProviderEvent({
                   type: "turn_item.updated",
                   driver: CLAUDE_PROVIDER,

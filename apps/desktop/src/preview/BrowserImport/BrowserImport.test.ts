@@ -58,7 +58,9 @@ const withImporter = Effect.fnUntraced(function* () {
         Layer.provide(DesktopManagedPolicy.layerTest()),
         Layer.provide(layerEnvironment),
         Layer.provide(Layer.succeed(HostProcess.Platform, "darwin")),
-        Layer.provide(Layer.succeed(HostProcess.ExecutablePath, "/Applications/T3 Code.app")),
+        Layer.provide(
+          Layer.succeed(HostProcess.ExecutablePath, "/Applications/noTeleme3-code.app"),
+        ),
         Layer.provide(NodeServices.layer),
       ),
     ),

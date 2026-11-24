@@ -1,3 +1,6 @@
+> [!NOTE]
+> This FAQ is upstream T3 Code's, answered by its maintainers in their own voice. Answers about pricing, T3 Connect, and T3 Chat describe their service. For what this fork changes, see [Telemetry in noTeleme3-code](./telemetry.md).
+
 # FAQ
 
 ## Is T3 Code a harness?
